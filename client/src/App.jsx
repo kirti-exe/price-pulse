@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 const products = [
   { id: 1, name: "Wireless Mouse", price: 799, store: "Amazon", originalPrice: 1299 },
   { id: 2, name: "Runnibg Shoes", price: 2499, store: "Myntra", originalPrice: 3999 },
@@ -25,10 +27,28 @@ function ProductCard(props){
 }
 
 function App(){
+  const [searchText, setSearchText] = useState("")
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(searchText.toLowerCase()) ||
+    product.store.toLowerCase().includes(searchText.toLowerCase())
+  )
+
   return (
     <div>
       <h1>Price Pulse</h1>
-      {products.map(product => (
+
+      <input 
+        type="text"
+        placeholder="Search products..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}  
+      />
+
+      <p>
+        Showing {filteredProducts.length} of {products.length} products
+      </p>
+
+      {filteredProducts.map(product => (
         <ProductCard
           key={product.id}
           name={product.name}
@@ -37,6 +57,8 @@ function App(){
           originalPrice={product.originalPrice}
         />
       ))}
+
+      {filteredProducts.length === 0 && <p>No products found.</p>}
     </div>
   )
 }
