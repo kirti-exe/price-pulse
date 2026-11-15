@@ -1,18 +1,24 @@
+import { Link } from "react-router-dom"
+import { getBestListing } from "../data/products"
+
 function ProductCard({ product }){
-  const { name, price, originalPrice, store} = product
-  const savings = originalPrice - price
-  const discount = Math.round((savings / originalPrice) * 100)
+  const best = getBestListing(product)
+  const savings = best.originalPrice - best.price
+  const discount = Math.round((savings / best.originalPrice) * 100)
 
   return (
+    <Link to={`/product/${product.id}`} className="card-link">
     <div className="card">
-        <span className={`store-badge ${store.toLowerCase()}`}>{store}</span>
-      <h3>{name}</h3>
-      <p className="price">₹{price}</p>
-      <p className="oiginal-price">₹{originalPrice}</p>
+        <span className={`store-badge ${best.store.toLowerCase()}`}>Cheapest on {best.store}</span>
+      <h3>{product.name}</h3>
+      <p className="price">₹{best.price}</p>
+      <p className="oiginal-price">₹{best.originalPrice}</p>
       <p className="discount">
         {discount}% off (save ₹{savings})
       </p>
+      <p className="store-count">Available on {product.listings.length} stores</p>
     </div>
+    </Link>
   )
 }
 
