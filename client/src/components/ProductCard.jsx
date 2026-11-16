@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { getBestListing } from "../data/products"
+import { getBestListing } from "../utils"
 
 function ProductCard({ product }){
   const best = getBestListing(product)

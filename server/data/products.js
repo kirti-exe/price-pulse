@@ -93,9 +93,3 @@ export const products = [
     ],
   },
 ]
-
-export function getBestListing(product) {
-  return product.listings.reduce((best, current) =>
-    current.price < best.price ? current : best
-  )
-}

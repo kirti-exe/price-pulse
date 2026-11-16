@@ -1,15 +1,40 @@
+import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom";
-import { products, getBestListing } from "../data/products";
+import { API_URL, getBestListing } from "../utils";
 import PriceChart from "../components/PriceChart";
 
 function ProductPage(){
     const { id } = useParams()
-    const product = products.find(p => p.id === Number(id))
+    const [product, setProduct] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    if(!product){
-        return(
+    useEffect(() => {
+        async function loadProduct(){
+            try{
+                setLoading(true)
+                const res = await fetch(`${API_URL}/api/products/${id}`)
+                if(!res.ok) throw new Error("Product not found")
+                const data = await res.json()
+                setProduct(data)
+                setError(null)
+            } catch (err) {
+                setProduct(null)
+                setError(err.message)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        loadProduct()
+    }, [id])
+
+    if(loading) return <p>Loading product...</p>
+    
+    if(error || !product){
+        return (
             <div>
-                <p>Product not found.</p>
+                <p>{error || "Product not found."}</p>
                 <Link to="/">← Back to all products</Link>
             </div>
         )
