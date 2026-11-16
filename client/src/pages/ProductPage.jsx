@@ -67,6 +67,7 @@ function ProductPage(){
                         <th>Price</th>
                         <th>Original</th>
                         <th>Discount</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -83,6 +84,9 @@ function ProductPage(){
                                 <td>₹{listing.price}</td>
                                 <td className="original-price">₹{listing.originalPrice}</td>
                                 <td>{discount}%</td>
+                                <td>
+                                    <a href="#" className="buy-btn">Buy</a>
+                                </td>
                             </tr>
                         )
                     })}

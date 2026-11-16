@@ -5,13 +5,14 @@ export const products = [
     listings: [
       { store: "Amazon", price: 799, originalPrice: 1299 },
       { store: "Flipkart", price: 849, originalPrice: 1299 },
+      { store: "Croma", price: 779, originalPrice: 1299 },
     ],
     history: [
-      { month: "Jul", Amazon: 1199, Flipkart: 1249 },
-      { month: "Aug", Amazon: 1099, Flipkart: 1149 },
-      { month: "Sep", Amazon: 999, Flipkart: 1049 },
-      { month: "Oct", Amazon: 899, Flipkart: 899 },
-      { month: "Nov", Amazon: 799, Flipkart: 849 },
+      { month: "Jul", Amazon: 1199, Flipkart: 1249, Croma: 1229 },
+      { month: "Aug", Amazon: 1099, Flipkart: 1149, Croma: 1129 },
+      { month: "Sep", Amazon: 999, Flipkart: 1049, Croma: 1029 },
+      { month: "Oct", Amazon: 899, Flipkart: 899, Croma: 929 },
+      { month: "Nov", Amazon: 799, Flipkart: 849, Croma: 779 },
     ],
   },
   {

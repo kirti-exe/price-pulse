@@ -13,6 +13,7 @@ const storeColors = {
     Amazon: "#ff9900",
     FlipKart: "#2874f0",
     Myntra: "#e91e63",
+    Croma: "#00a88f",
 }
 
 function PriceChart({ history, stores }) {
