@@ -33,6 +33,7 @@ function PriceChart({ history, stores }) {
                             dataKey={store}
                             stroke={storeColors[store] || "#555"}
                             strokeWidth={2}
+                            connectNulls
                         />
                     ))}
                 </LineChart>

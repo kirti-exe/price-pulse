@@ -20,8 +20,8 @@ export async function getProducts(productId = null) {
 
   const historyResult = await pool.query(
     `SELECT l.product_id, s.name AS store, ph.price,
-            to_char(ph.recorded_at, 'YYYY-MM') AS ym,
-            to_char(ph.recorded_at, 'Mon') AS month
+            to_char(ph.recorded_at, 'YYYY-MM-DD') AS ym,
+            to_char(ph.recorded_at, 'FMDD Mon') AS month
      FROM price_history ph
      JOIN listings l ON l.id = ph.listing_id
      JOIN stores s ON s.id = l.store_id
@@ -105,7 +105,7 @@ export async function addProduct({ name, listings }){
 }
 
 export async function recordPrice(productId, store, price){
-    const update = await pool.query(
+    const updated = await pool.query(
         `UPDATE listings l
         SET price = $3
         FROM stores s
@@ -117,9 +117,9 @@ export async function recordPrice(productId, store, price){
     if(updated.rowCount === 0) return false
 
     await pool.query(
-        `INSERT INTO price_history (listing_id, price, recorded_at)
-        VALUES ($1, $2, CURRENT_DATE)`,
-        [updated.rows[0].id, price]
-    )
+    `INSERT INTO price_history (listing_id, price, recorded_at)
+     VALUES ($1, $2, CURRENT_DATE)`,
+    [updated.rows[0].id, price]
+)
     return true
 }

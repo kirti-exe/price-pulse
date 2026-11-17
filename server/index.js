@@ -53,28 +53,30 @@ app.get("/api/products/:id", async (req, res) => {
 })
 
 app.post("/api/products", requireAdmin, async (req, res) => {
-  try{
-    const { name, listings } = req.body
-    
-    const valid = 
-      typeof name === "string" && 
-      name.trim() !== "" &&
-      Array.isArray(listings) &&
-      listings.length > 0 &&
-      listings.every(
-        (l) =>
-          typeof l.store === "String" &&
-        Number.isInteger(l.price) && l.price > 0 &&
-        Number.isInteger(l.originalPrice) && l.originalPrice > 0
-      )
-      
-    if (!valid) {
-      return res.status(400).json({ error: "Invalid product data" })
-    }
+  try {
+    console.log("body received:", req.body)
 
-    const id = await addProduct({ name: name.trim(), listings })
-    res.status(201).json({ id })
-  }catch(err){
+    if (!req.body || typeof req.body.name !== "string" || req.body.name.trim() === "") {
+  return res.status(400).json({ error: "name is missing or not text" })
+    }
+    if (!Array.isArray(req.body.listings) || req.body.listings.length === 0) {
+  return res.status(400).json({ error: "listings must be a non-empty array" })
+}
+for (const l of req.body.listings) {
+  if (typeof l.store !== "string") {
+    return res.status(400).json({ error: "each listing needs a store name (text)" })
+  }
+  if (!Number.isInteger(l.price) || l.price <= 0) {
+    return res.status(400).json({ error: "price must be a whole number above 0" })
+  }
+  if (!Number.isInteger(l.originalPrice) || l.originalPrice <= 0) {
+    return res.status(400).json({ error: "originalPrice must be a whole number above 0" })
+  }
+} 
+const { name, listings } = req.body
+const id = await addProduct({ name: name.trim(), listings })
+res.status(201).json({ id })
+  } catch (err) {
     console.error(err)
     res.status(500).json({ error: "Something went wrong" })
   }
