@@ -2,7 +2,7 @@ import cron from "node-cron"
 import { updateAllPrices } from "./jobs/updatePrices.js"
 import express from "express"
 import cors from "cors"
-import { getProducts, addProduct, recordPrice } from "./db/queries.js"
+import { getProducts, addProduct, recordPrice, addAlert } from "./db/queries.js"
 
 const app = express()
 const PORT = 5000
@@ -109,6 +109,37 @@ app.post("/api/admin/update-prices", requireAdmin, async (req, res) => {
   try {
     const summary = await updateAllPrices()
     res.json(summary)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
+  }
+})
+
+app.post("/api/alerts", async (req, res) => {
+  try {
+    const { productId, email, targetPrice } = req.body || {}
+
+    const emailOk =
+      typeof email === "string" &&
+      email.length <= 254 &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+    if (!Number.isInteger(productId)) {
+      return res.status(400).json({ error: "Invalid product" })
+    }
+    if (!emailOk) {
+      return res.status(400).json({ error: "Please enter a valid email" })
+    }
+    if (!Number.isInteger(targetPrice) || targetPrice <= 0) {
+      return res.status(400).json({ error: "Target price must be a whole number above 0" })
+    }
+
+    const id = await addAlert(productId, email.trim().toLowerCase(), targetPrice)
+    if (id === null) {
+      return res.status(404).json({ error: "Product not found" })
+    }
+
+    res.status(201).json({ id })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: "Something went wrong" })

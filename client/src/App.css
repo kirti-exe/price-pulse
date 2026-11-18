@@ -207,3 +207,60 @@ h1 {
   border-radius: 8px;
   font-weight: bold;
 }
+
+.alert-form{
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  margin: 16px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.alert-form h3{
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.alert-hint{
+  flex-basis: 100%;
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.alert-form input{
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.alert-form button {
+  padding: 10px 20px;
+  background: #1a8f3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.alert-form button:disabled {
+  background: #9bb;
+  cursor: not-allowed;
+}
+
+.alert-status {
+  flex-basis: 100%;
+  margin: 0;
+  font-weight: bold;
+}
+
+.alert-status.sucess { color: #1a8f3c; }
+.alert-status.error { color: #c0392b; }

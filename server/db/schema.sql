@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS price_history;
 DROP TABLE IF EXISTS listings;
 DROP TABLE IF EXISTS stores;
 DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS alerts;
 
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
@@ -27,4 +28,13 @@ CREATE TABLE price_history (
     listing_id INT NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
     price INT NOT NULL,
     recorded_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE alerts (
+    id SERIAL PRIMARY KEY,
+    product_id INT NOT NULL REFERNCES products(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    target_price INT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    notified_at TIMESTAMPTZ
 );

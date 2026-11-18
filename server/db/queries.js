@@ -133,3 +133,39 @@ export async function getAllListings() {
   )
   return result.rows
 }
+
+export async function addAlert(productId, email, targetPrice) {
+  const product = await pool.query("SELECT 1 FROM products WHERE id = $1", [productId])
+  if (product.rowcount === 0) return null
+  
+  const result = await pool.query(
+    `INSERT INTO alerts (product_id, email, target_price)
+    VALUES ($1, $2, $3) RETURNING id`,
+    [productId, email, targetPrice]
+  )
+  return result.rows[0].id
+}
+
+export async function getTriggeredAlerts() {
+  const result = await pool.query(
+    `SELECT a.id, a.email, a.target_price,
+            p.id AS product_id, p.name AS product_name,
+            best.price, best.store
+    FROM alerts a
+    JOIN products p ON p.id = a.product_id
+    JOIN LATERAL (
+      SELECT l.price, s.name AS store
+      FROM lsitings l 
+      JOIN stores s ON s.id = l.store_id
+      WHERE l.product_id = a.product_id
+      ORDER BY l.price
+      LIMIT 1
+    ) best ON TRUE
+    WHERE a.notified_at IS NULL AND best.price <= a.target_price`
+  )
+  return result.rows
+}
+
+export async function markAlertNotified(alertId){
+  await pool.query("UPDATE alerts SET notfied_at = NOW() WHERE id = $1", [alertId])
+}

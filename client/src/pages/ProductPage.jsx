@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom";
 import { API_URL, getBestListing, getPriceStats, getDealVerdict } from "../utils";
 import PriceChart from "../components/PriceChart";
-
+import AlertForm from "../components/AlertForm";
 
 function ProductPage(){
     const { id } = useParams()
@@ -76,6 +76,8 @@ function ProductPage(){
                     <strong>₹{highest}</strong>
                 </div>
             </div>
+
+            <AlertForm productId={product.id} currentPrice={best.price} />
 
             <h3>Price history</h3>
             <PriceChart history={product.history} stores={stores} />
