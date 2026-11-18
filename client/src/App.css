@@ -184,3 +184,26 @@ h1 {
 .store-badge.flipkart { background: #2874f0; }
 .store-badge.myntra { background: #e91e63; }
 .store-badge.croma { background: #00a88f; }
+
+.deal-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-bottom: 4px;
+}
+
+.deal-badge.great, .verdict.great { background: #d4f5df; color: #0f6b2c; }
+.deal-badge.good,  .verdict.good  { background: #e6f4d7; color: #3f6b0f; }
+.deal-badge.fair,  .verdict.fair  { background: #fff4d6; color: #8a6200; }
+.deal-badge.wait,  .verdict.wait  { background: #fde2e2; color: #a12020; }
+
+.price-drop { color: #1a8f3c; font-weight: bold; font-size: 14px; margin: 4px 0; }
+.price-rise { color: #c0392b; font-weight: bold; font-size: 14px; margin: 4px 0; }
+
+.verdict {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: bold;
+}

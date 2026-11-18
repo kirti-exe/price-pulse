@@ -22,7 +22,7 @@ function PriceChart({ history, stores }) {
             <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={history}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
+                    <XAxis dataKey="month" minTickGap={40}/>
                     <YAxis domain={["auto", "auto"]} tickFormatter={(v) => `₹${v}`} />
                     <Tooltip formatter={(v) => `₹${v}`} />
                     <Legend />

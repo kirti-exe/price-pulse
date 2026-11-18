@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom";
-import { API_URL, getBestListing } from "../utils";
+import { API_URL, getBestListing, getPriceStats, getDealVerdict } from "../utils";
 import PriceChart from "../components/PriceChart";
+
 
 function ProductPage(){
     const { id } = useParams()
@@ -43,16 +44,9 @@ function ProductPage(){
     const best = getBestListing(product)
     const stores = product.listings.map((l) => l.store)
 
-    const allPrices = product.history
-        .flatMap((entry) => stores.map((store) => entry[store]))
-        .filter((price) => price !== undefined)
-
-    const lowest = Math.min(...allPrices)
-    const highest = Math.max(...allPrices)
-    const average = Math.round(
-        allPrices.reduce((sum, p) => sum + p, 0) / allPrices.length
-    )
-    const isLowestEver = best.price <= lowest
+    const { lowest, highest, average } = getPriceStats(product)
+    const verdict = getDealVerdict(best.price, { lowest, highest })
+    const belowAverage = Math.round(((average - best.price) / average) * 100)
 
     return (
         <div>
@@ -62,9 +56,11 @@ function ProductPage(){
                 Best price: ₹{best.price} on {best.store}
             </p>
 
-            {isLowestEver && (
-                <p className="buy-now">🔥 This is the lowest price recorded. Good time to buy!</p>
-            )}
+            <p className={`verdict ${verdict.level}`}>
+                {verdict.label}
+                {belowAverage > 0 && ` · ${belowAverage}% below the average price`}
+                {belowAverage < 0 && ` · ${Math.abs(belowAverage)}% above the average price`}
+            </p>
 
             <div className="stats">
                 <div className="stat">
