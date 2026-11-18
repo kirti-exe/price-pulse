@@ -1,3 +1,5 @@
+import cron from "node-cron"
+import { updateAllPrices } from "./jobs/updatePrices.js"
 import express from "express"
 import cors from "cors"
 import { getProducts, addProduct, recordPrice } from "./db/queries.js"
@@ -103,6 +105,24 @@ app.post("/api/products/:id/price", requireAdmin, async(req, res) => {
   }
 })
 
+app.post("/api/admin/update-prices", requireAdmin, async (req, res) => {
+  try {
+    const summary = await updateAllPrices()
+    res.json(summary)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`)
 })
+
+cron.schedule(
+  "0 */6 * * *",
+  () => {
+    updateAllPrices().catch((err) => console.error("Scheduled update failed:", err))
+  },
+  { timezone: "Asia/Kolkata" }
+)

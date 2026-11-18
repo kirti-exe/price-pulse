@@ -20,8 +20,8 @@ export async function getProducts(productId = null) {
 
   const historyResult = await pool.query(
     `SELECT l.product_id, s.name AS store, ph.price,
-            to_char(ph.recorded_at, 'YYYY-MM-DD') AS ym,
-            to_char(ph.recorded_at, 'FMDD Mon') AS month
+            to_char(ph.recorded_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD HH24:MI') AS ym,
+            to_char(ph.recorded_at AT TIME ZONE 'Asia/Kolkata', 'FMDD Mon HH24:MI') AS month
      FROM price_history ph
      JOIN listings l ON l.id = ph.listing_id
      JOIN stores s ON s.id = l.store_id
@@ -89,7 +89,7 @@ export async function addProduct({ name, listings }){
 
             await client.query(
                 `INSERT INTO price_history (listing_id, price, recorded_at)
-                VALUES ($1, $2, CURRENT_DATE)`,
+                VALUES ($1, $2, NOW())`,
                 [listingResult.rows[0].id, l.price]
             )
         }
@@ -118,8 +118,18 @@ export async function recordPrice(productId, store, price){
 
     await pool.query(
     `INSERT INTO price_history (listing_id, price, recorded_at)
-     VALUES ($1, $2, CURRENT_DATE)`,
+     VALUES ($1, $2, NOW())`,
     [updated.rows[0].id, price]
 )
     return true
+}
+
+export async function getAllListings() {
+  const result = await pool.query(
+    `SELECT l.product_id, s.name AS store, l.price, l.original_price
+     FROM listings l
+     JOIN stores s ON s.id = l.store_id
+     ORDER BY l.id`
+  )
+  return result.rows
 }

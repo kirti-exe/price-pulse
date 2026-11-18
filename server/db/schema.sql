@@ -26,5 +26,5 @@ CREATE TABLE price_history (
     id SERIAL PRIMARY KEY,
     listing_id INT NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
     price INT NOT NULL,
-    recorded_at DATE NOT NULL
+    recorded_at TIMESTAMPTZ NOT NULL
 );
