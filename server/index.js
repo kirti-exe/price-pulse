@@ -3,11 +3,18 @@ import { updateAllPrices } from "./jobs/updatePrices.js"
 import express from "express"
 import cors from "cors"
 import { getProducts, addProduct, recordPrice, addAlert } from "./db/queries.js"
+import rateLimit from "express-rate-limit"
 
 const app = express()
-const PORT = 5000
+const PORT = process.env.PORT || 5000
 
-app.use(cors())
+app.set("trust proxy", 1)
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+  })
+)
 app.use(express.json())
 
 function requireAdmin(req, res, next){
@@ -114,6 +121,8 @@ app.post("/api/admin/update-prices", requireAdmin, async (req, res) => {
     res.status(500).json({ error: "Something went wrong" })
   }
 })
+
+const alertLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10 })
 
 app.post("/api/alerts", async (req, res) => {
   try {

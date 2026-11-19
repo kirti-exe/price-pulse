@@ -266,3 +266,10 @@ h1 {
 .alert-status.error { color: #c0392b; }
 
 .no-link { color: #999; font-size: 14px; }
+
+.dome-note {
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  margin-top: 32px;
+}

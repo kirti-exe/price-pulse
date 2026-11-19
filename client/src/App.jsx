@@ -3,17 +3,21 @@ import Home from "./pages/Home"
 import ProductPage from "./pages/ProductPage"
 import "./App.css"
 
-function App(){
+function App() {
   return (
     <div className="container">
       <h1>
-        <Link to="/" className="logo">Price Pulse</Link>
+        <Link to="/" className="logo">Price Tracker</Link>
       </h1>
 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/product/:id" element={<ProductPage />} />
       </Routes>
+
+      <p className="demo-note">
+        Prices shown are simulated demo data, not live store prices.
+      </p>
     </div>
   )
 }
