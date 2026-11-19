@@ -10,7 +10,7 @@ export async function getProducts(productId = null) {
   )
 
   const listingsResult = await pool.query(
-    `SELECT l.product_id, s.name AS store, l.price, l.original_price
+    `SELECT l.product_id, s.name AS store, l.price, l.original_price, l.url
      FROM listings l
      JOIN stores s ON s.id = l.store_id
      WHERE ($1::int IS NULL OR l.product_id = $1)
@@ -37,6 +37,7 @@ export async function getProducts(productId = null) {
         store: l.store,
         price: l.price,
         originalPrice: l.original_price,
+        url: l.url,
       }))
 
     const historyByMonth = {}
@@ -126,7 +127,8 @@ export async function recordPrice(productId, store, price){
 
 export async function getAllListings() {
   const result = await pool.query(
-    `SELECT l.product_id, s.name AS store, l.price, l.original_price
+    `SELECT l.product_id, s.name AS store, l.price, l.original_price,
+            l.external_id, l.url
      FROM listings l
      JOIN stores s ON s.id = l.store_id
      ORDER BY l.id`

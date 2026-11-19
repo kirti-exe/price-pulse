@@ -20,6 +20,8 @@ CREATE TABLE listings (
     store_id INT NOT NULL REFERENCES stores(id),
     price INT NOT NULL,
     original_price INT NOT NULL,
+    ALTER TABLE listings ADD COLUMN external_id TEXT;
+    ALTER TABLE listings ADD COLUMN url TEXT;
     UNIQUE (product_id, store_id) 
 );
 

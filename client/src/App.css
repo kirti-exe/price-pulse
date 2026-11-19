@@ -264,3 +264,5 @@ h1 {
 
 .alert-status.sucess { color: #1a8f3c; }
 .alert-status.error { color: #c0392b; }
+
+.no-link { color: #999; font-size: 14px; }

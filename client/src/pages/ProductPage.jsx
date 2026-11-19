@@ -108,7 +108,18 @@ function ProductPage(){
                                 <td className="original-price">₹{listing.originalPrice}</td>
                                 <td>{discount}%</td>
                                 <td>
-                                    <a href="#" className="buy-btn">Buy</a>
+                                    {listing.url ? (
+                                        <a
+                                            href={listing.url}
+                                            className="but-btn"
+                                            target="_blank"
+                                            rel="noopener noreferrer sponsored"
+                                        >
+                                           Buy 
+                                        </a>
+                                    ) : (
+                                        <span className="no-link">No link</span>
+                                )}
                                 </td>
                             </tr>
                         )
