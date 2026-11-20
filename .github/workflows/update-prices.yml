@@ -1,0 +1,17 @@
+name: Update prices
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the update route
+        run: |
+          curl --fail --silent --show-error \
+            --max-time 180 --retry 3 --retry-delay 30 --retry-all-errors \
+            -X POST "${{ secrets.API_URL }}/api/admin/update-prices" \
+            -H "x-admin-key: ${{ secrets.ADMIN_KEY }}"
