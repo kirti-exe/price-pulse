@@ -9,6 +9,9 @@
     "start": "node index.js",
     "seed": "node --env-file=.env db/seed.js"
   },  
+  "engines": {
+    "node": ">=20"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
