@@ -6,7 +6,9 @@ DROP TABLE IF EXISTS alerts;
 
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    category TEXT,
+    image TEXT
 );
 
 CREATE TABLE stores(

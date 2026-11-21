@@ -1,5 +1,6 @@
 import { getAllListings, recordPrice } from "../db/queries.js"
 import { fetchPrice } from "./fetchPrice.js"
+import { checkAlerts } from "./checkAlerts.js"
 
 let running = false
 
@@ -32,6 +33,12 @@ export async function updateAllPrices(){
         }
     }finally{
         running = false
+    }
+
+    try{
+        await checkAlerts()
+    } catch(err) {
+        console.error("Alert check failed:", err.message)
     }
 
     console.log(`Price update done: ${checked} checked, ${changed} changed, ${failed} failed`)

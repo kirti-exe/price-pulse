@@ -5,20 +5,22 @@ import "./App.css"
 
 function App() {
   return (
-    <div className="container">
-      <h1>
-        <Link to="/" className="logo">Price Tracker</Link>
-      </h1>
+    <>
+      <header className="site-header">
+        <Link to="/" className="logo">📉 Price Pulse</Link>
+        <p className="tagline">Compare prices across stores and buy at the right time</p>
+      </header>
+      <main className="container">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/product/:id" element={<ProductPage />} />
+        </Routes>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/product/:id" element={<ProductPage />} />
-      </Routes>
-
-      <p className="demo-note">
-        Prices shown are simulated demo data, not live store prices.
-      </p>
-    </div>
+        <p className="demo-note">
+          Prices shown are simulated demo data, not live store prices.
+        </p>
+      </main>
+    </>
   )
 }
 

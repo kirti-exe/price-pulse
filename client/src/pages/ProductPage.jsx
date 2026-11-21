@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { API_URL, getBestListing, getPriceStats, getDealVerdict } from "../utils";
 import PriceChart from "../components/PriceChart";
 import AlertForm from "../components/AlertForm";
+import ProductImage from "../components/ProductImage";
 
 function ProductPage(){
     const { id } = useParams()
@@ -50,17 +51,26 @@ function ProductPage(){
 
     return (
         <div>
-            <Link to="/">← Back to all products</Link>
-            <h2>{product.name}</h2>
-            <p className="best-deal">
-                Best price: ₹{best.price} on {best.store}
-            </p>
+            <Link to="/" className="back-line">← Back to all products</Link>
+            
+            <div className="product-hero">
+                <div className="product-hero-image">
+                    <ProductImage product={product} />
+                </div>
 
-            <p className={`verdict ${verdict.level}`}>
-                {verdict.label}
-                {belowAverage > 0 && ` · ${belowAverage}% below the average price`}
-                {belowAverage < 0 && ` · ${Math.abs(belowAverage)}% above the average price`}
-            </p>
+                <div className="product-hero-info">
+                    <h2>{product.name}</h2>
+                    {product.category && <span className="category-tag">{product.category}</span>}
+                    <p className="best-deal">
+                        Best price: ₹{best.price} on {best.store}
+                    </p>
+                    <p className={`verdict ${verdict.level}`}>
+                        {verdict.label}
+                        {belowAverage > 0 && ` · ${belowAverage}% below the average price`}
+                        {belowAverage < 0 && ` · ${Math.abs(belowAverage)}% above the average price`}
+                    </p>
+                </div>
+            </div>
 
             <div className="stats">
                 <div className="stat">

@@ -2,7 +2,7 @@ import { pool } from "./db.js"
 
 export async function getProducts(productId = null) {
   const productsResult = await pool.query(
-    `SELECT id, name
+    `SELECT id, name, category, image
      FROM products
      WHERE ($1::int IS NULL OR id = $1)
      ORDER BY id`,
@@ -53,7 +53,14 @@ export async function getProducts(productId = null) {
       historyByMonth[row.ym][row.store] = row.price
     }
 
-    return { id: product.id, name: product.name, listings, history }
+    return { 
+      id: product.id,
+      name: product.name, 
+      category: product.category,
+      image: product.image,
+      listings,
+      history,
+    }
   })
 }
 
