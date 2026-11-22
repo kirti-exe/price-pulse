@@ -2,6 +2,11 @@ import fs from "fs"
 import { pool } from "./db.js"
 import { products } from "../data/products.js"
 
+if(process.env.APP_ENV !== "development"){
+  console.error("Refusing to run: APP_ENV is not 'development'.")
+  process.exit(1)
+}
+
 const monthDates = {
   Jul: "2026-07-01",
   Aug: "2026-08-01",
