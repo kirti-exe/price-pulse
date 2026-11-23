@@ -453,3 +453,95 @@
     font-size: 26px;
   }
 }
+
+.admin-login{
+  max-width: 360px;
+  margin: 40px auto;
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-login h2 { margin: 0; }
+
+.admin-top{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-form{
+  background: white;
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.admin-form h3, .admin-form h4 {margin: 4px 0;}
+
+.admin-row{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-row > * {flex: 1; min-width: 120px;}
+
+.admin-form input,
+.admin-form select,
+.admin-form input{
+  padding: 10px 12px;
+  border: 1px solid #d9dbe6;
+  border-radius: 10px;
+  font-size: 15px;
+  background: white;
+}
+
+.admmin-form button[type="submit"],
+.admin-login button {
+  padding: 11px 22px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.admin-form button:disabled {background: #a5a1e8; cursor: not-allowed;}
+
+.secondary-btn{
+  padding: 9px 16px;
+  background: #eef0ff;
+  color: var(--primary);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.link-btn{
+  background: none;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.danger-btn{
+  background: #fde2e2;
+  color: #a12020;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}

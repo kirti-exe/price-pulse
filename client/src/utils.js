@@ -44,3 +44,17 @@ export function getLastChange(product, store){
   const diff = series[series.length - 1] - series[series.length - 2]
   return diff === 0 ? null : { diff }
 }
+
+export async function adminFetch(path, adminKey, options = {}) {
+  const res = await fetch(`${API_URL}$(path)`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-key": adminKey,
+    },
+  })
+
+  const data = await res.json().catch(() => null)
+  if(!res.ok) throw new Error(data?.error || `Request failed (${res.status})`)
+  return data
+}

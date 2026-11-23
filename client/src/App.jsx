@@ -1,6 +1,7 @@
 import { Routes, Route, Link } from "react-router-dom"
 import Home from "./pages/Home"
 import ProductPage from "./pages/ProductPage"
+import Admin from "./pages/Admin"
 import "./App.css"
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           Prices shown are simulated demo data, not live store prices.
         </p>
       </main>
+      <Route path="/admin" element={<Admin />} />
     </>
   )
 }
