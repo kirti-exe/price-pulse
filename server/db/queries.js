@@ -74,41 +74,41 @@ async function getOrCreateStoreId(client, name) {
     return result.rows[0].id
 }
 
-export async function addProduct({ name, listings }){
-    const client = await pool.connect()
+export async function addProduct({ name, category, image, listings }){
+  const client = await pool.connect()
 
-    try{
-        await client.query("BEGIN")
+  try{
+    await client.query("BEGIN")
 
-        const productResult = await client.query(
-            "INSERT INTO products (name) VALUES ($1) RETURNING id",
-            [name]
-        )
-        const productId = productResult.rows[0].id
+    const productResult = await client.query(
+      "INSERT INTO products (name, category, image) VALUES ($1, $2, $3) RETURNING id",
+      [name, category, image]
+    )
+    const productId = productResult.rows[0].id
 
-        for(const l of listings){
-            const storeId = await getOrCreateStoreId(client, l.store)
+    for(const l of listings){
+      const storeId = await getOrCreateStoreId(client, l.store)
 
-            const listingResult = await client.query(
-                `INSERT INTO listings (product_id, store_id, price, original_price)
-                VALUES ($1, $2, $3, $4) RETURNING id`,
-                [productId, storeId, l.price, l.originalPrice]
-            )
+      const listingResult = await client.query(
+        `INSERT INTO listings (product_id, store_id, price, original_price)
+        VALUES ($1, $2, $3, $4) RETURNING id`,
+        [productId, storeId, l.price, l.originalPrice]
+      )
 
-            await client.query(
-                `INSERT INTO price_history (listing_id, price, recorded_at)
-                VALUES ($1, $2, NOW())`,
-                [listingResult.rows[0].id, l.price]
-            )
-        }
+      await client.query(
+        `INSERT INTO price_history (listing_id, price, recorded_at)
+        VALUES ($1, $2, NOW())`,
+        [listingResult.rows[0].id, l.price]
+      )
+    }
 
-        await client.query("COMMIT")
-        return productId
+    await client.query("COMMIT")
+    return productId
     }catch(err){
-        await client.query("ROLLBACK")
-        throw err
+    await client.query("ROLLBACK")
+    throw err
     }finally{
-        client.release()
+    client.release()
     }
 }
 
@@ -177,4 +177,17 @@ export async function getTriggeredAlerts() {
 
 export async function markAlertNotified(alertId){
   await pool.query("UPDATE alerts SET notfied_at = NOW() WHERE id = $1", [alertId])
+}
+
+export async function updateProduct(id, { name, category, image }){
+  const result = await pool.query(
+    "UPDATE products SET name = $2, category = $3, image = $4 WHERE id = $1",
+    [id, name, category, image]
+  )
+  return result.rowCount > 0
+}
+
+export async function deleteProduct(id){
+  const result = await pool.query("DELETE FROM products WHERE id = $1", [id])
+  return result.rowCount > 0
 }

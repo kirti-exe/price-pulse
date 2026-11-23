@@ -2,7 +2,7 @@ import cron from "node-cron"
 import { updateAllPrices } from "./jobs/updatePrices.js"
 import express from "express"
 import cors from "cors"
-import { getProducts, addProduct, recordPrice, addAlert } from "./db/queries.js"
+import { getProducts, addProduct, updateProduct, deleteProduct, recordPrice, addAlert } from "./db/queries.js"
 import rateLimit from "express-rate-limit"
 
 const app = express()
@@ -17,12 +17,27 @@ app.use(
 )
 app.use(express.json())
 
-function requireAdmin(req, res, next){
-  if(!process.env.ADMIN_KEY || req.headers["x-admin-key"] !== process.env.ADMIN_KEY){
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  skipSuccessfulRequests: true,
+})
+
+function checkAdminKey(req, res, next){
+  if(!process.env.ADMIN_KEY || req.headers["x-admin-key"] != process.env.ADMIN_KEY){
     return res.status(401).json({ error: "Unauthorized" })
   }
   next()
 }
+
+const requireAdmin = [adminLimiter, checkAdminKey]
+
+// function requireAdmin(req, res, next){
+//   if(!process.env.ADMIN_KEY || req.headers["x-admin-key"] !== process.env.ADMIN_KEY){
+//     return res.status(401).json({ error: "Unauthorized" })
+//   }
+//   next()
+// }
 
 app.get("/", (req, res) => {
   res.send("Price Tracker API is running")
@@ -61,31 +76,130 @@ app.get("/api/products/:id", async (req, res) => {
   }
 })
 
+// app.post("/api/products", requireAdmin, async (req, res) => {
+//   try {
+//     console.log("body received:", req.body)
+
+//     if (!req.body || typeof req.body.name !== "string" || req.body.name.trim() === "") {
+//   return res.status(400).json({ error: "name is missing or not text" })
+//     }
+//     if (!Array.isArray(req.body.listings) || req.body.listings.length === 0) {
+//   return res.status(400).json({ error: "listings must be a non-empty array" })
+// }
+// for (const l of req.body.listings) {
+//   if (typeof l.store !== "string") {
+//     return res.status(400).json({ error: "each listing needs a store name (text)" })
+//   }
+//   if (!Number.isInteger(l.price) || l.price <= 0) {
+//     return res.status(400).json({ error: "price must be a whole number above 0" })
+//   }
+//   if (!Number.isInteger(l.originalPrice) || l.originalPrice <= 0) {
+//     return res.status(400).json({ error: "originalPrice must be a whole number above 0" })
+//   }
+// } 
+// const { name, listings } = req.body
+// const id = await addProduct({ name: name.trim(), listings })
+// res.status(201).json({ id })
+//   } catch (err) {
+//     console.error(err)
+//     res.status(500).json({ error: "Something went wrong" })
+//   }
+// })
+
+function cleanProductFields(body){
+  const { name, category, image } = body || {}
+
+  if(typeof name !== "string" || name.trim() === "" || name.length > 200){
+    return { error: "Name is required (max 200 characters)" }
+  }
+  if(category != null && (typeof category !== "string" || category.length > 50)){
+    return { error: "Category must be short text" }
+  }
+  if(
+    image != null &&
+    (typeof image !== "string" ||
+      image.length > 300 ||
+      !(image.startsWith("/") || image.startsWith("https://")))
+  ) {
+    return { error: "Image must start with / or https://" }
+  }
+
+  return {
+    value: {
+      name: name.trim(),
+      category: category?.trim() || null,
+      image: image?.trim() || null,
+    },
+  }
+}
+
+app.get("/api/admin/check", requireAdmin, (req, res) => {
+  res.json({ ok: true })
+})
+
 app.post("/api/products", requireAdmin, async (req, res) => {
   try {
-    console.log("body received:", req.body)
+    const fields = cleanProductFields(req.body)
+    if(fields.error) return res.status(400).json({ error: fields.error })
 
-    if (!req.body || typeof req.body.name !== "string" || req.body.name.trim() === "") {
-  return res.status(400).json({ error: "name is missing or not text" })
+    const listings = req.body.listings
+    if(!Array.isArray(listings) || listings.length === 0){
+      return res.status(400).json({ error: "Add at least one store listing" })
     }
-    if (!Array.isArray(req.body.listings) || req.body.listings.length === 0) {
-  return res.status(400).json({ error: "listings must be a non-empty array" })
-}
-for (const l of req.body.listings) {
-  if (typeof l.store !== "string") {
-    return res.status(400).json({ error: "each listing needs a store name (text)" })
+
+    for(const l of listings){
+      if(typeof l.store !== "string" || l.store.trim() === ""){
+        return res.status(400).json({ error: "Each lisitings needs a store name" })
+      }
+      if(!Number.isInteger(l.price) || l.price <= 0){
+        return res.status(400).json({ error: "Price must be a whole number above 0" })
+      }
+      if(!Number.isInteger(l.originalPrice) || l.originalPrice <= 0){
+        return res.status(400).json({ error: "Original price must be a whole number above 0"})
+      }
+    }
+
+    const cleaned = listings.map((l) => ({ ...l, store: l.store.trim() }))
+    if(new Set(cleaned.map((l) => l.store)).size !== cleaned.length){
+      return res.status(400).json({ error: "Each store can only be listed once" })
+    }
+
+    const id = await addProduct({ ...fields.value, listings: cleaned })
+    res.status(201).json({ id })
+  }catch(err){
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
   }
-  if (!Number.isInteger(l.price) || l.price <= 0) {
-    return res.status(400).json({ error: "price must be a whole number above 0" })
+})
+
+app.put("/api/products/:id", requireAdmin, async (req, res) => {
+  try{
+    const id = Number(req.params.id)
+    if(!Number.isInteger(id)) return res.status(404).json({ error: "Product not found" })
+
+    const fields = cleanProductFields(req.body)
+    if(fields.error) return res.status(400).json({ error: fields.error })
+
+    const found = await updateProduct(id, fields.value)
+    if(!found) return res.status(404).json({ error: "Product not found" })
+
+    res.json({ ok: true })
+  }catch(err){
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
   }
-  if (!Number.isInteger(l.originalPrice) || l.originalPrice <= 0) {
-    return res.status(400).json({ error: "originalPrice must be a whole number above 0" })
-  }
-} 
-const { name, listings } = req.body
-const id = await addProduct({ name: name.trim(), listings })
-res.status(201).json({ id })
-  } catch (err) {
+})
+
+app.delete("/api/products/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+    if(!Number.isInteger(id)) return res.status(404).json({ error: "Product not found" })
+
+    const found = await deleteProduct(id)
+    if(!found) return res.status(404).json({ error: "Product not found" })
+
+    res.json({ ok: true })
+  } catch(err){
     console.error(err)
     res.status(500).json({ error: "Something went wrong" })
   }
