@@ -46,7 +46,7 @@ export function getLastChange(product, store){
 }
 
 export async function adminFetch(path, adminKey, options = {}) {
-  const res = await fetch(`${API_URL}$(path)`, {
+  const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",

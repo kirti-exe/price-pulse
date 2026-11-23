@@ -11,17 +11,18 @@ function App() {
         <Link to="/" className="logo">📉 Price Pulse</Link>
         <p className="tagline">Compare prices across stores and buy at the right time</p>
       </header>
+
       <main className="container">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/product/:id" element={<ProductPage />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
 
         <p className="demo-note">
           Prices shown are simulated demo data, not live store prices.
         </p>
       </main>
-      <Route path="/admin" element={<Admin />} />
     </>
   )
 }

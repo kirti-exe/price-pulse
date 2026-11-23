@@ -15,7 +15,9 @@ function Admin() {
 
   async function loadProducts() {
     const res = await fetch(`${API_URL}/api/products`)
-    setProducts(await res.json())
+    if (!res.ok) throw new Error("Could not load products")
+    const data = await res.json()
+    setProducts(Array.isArray(data) ? data : [])
   }
 
   async function verify(key) {
