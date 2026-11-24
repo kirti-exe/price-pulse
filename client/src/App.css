@@ -72,8 +72,8 @@
 
 .chip {
   padding: 8px 16px;
-  border: 1px solid #d9dbe6;
-  background: white;
+  border: 1px solid var(--border);
+  background: var(--surface);
   border-radius: 999px;
   font-size: 14px;
   cursor: pointer;
@@ -106,9 +106,9 @@
 .sort-select {
   padding: 9px 14px;
   font-size: 14px;
-  border: 1px solid #d9dbe6;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: white;
+  background: var(--surface);
 }
 
 /* Product grid and cards */
@@ -125,7 +125,7 @@
 }
 
 .card {
-  background: white;
+  background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -141,7 +141,7 @@
 .card-image {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: #eef0f7;
+  background: var(--surface-2);
 }
 
 .product-img {
@@ -158,7 +158,7 @@
   align-items: center;
   justify-content: center;
   font-size: 56px;
-  background: linear-gradient(135deg, #eef0ff, #f6e9ff);
+  background: linear-gradient(135deg, var(--tint), var(--tint-2));
 }
 
 .discount-tag {
@@ -265,7 +265,7 @@
   gap: 28px;
   align-items: center;
   margin: 20px 0;
-  background: white;
+  background: var(--surface);
   padding: 20px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -275,7 +275,7 @@
   aspect-ratio: 4 / 3;
   border-radius: 12px;
   overflow: hidden;
-  background: #eef0f7;
+  background: var(--surface-2);
 }
 
 .product-hero-info h2 {
@@ -285,7 +285,7 @@
 
 .category-tag {
   display: inline-block;
-  background: #eef0ff;
+  background: var(--tint);
   color: var(--primary);
   font-size: 12px;
   font-weight: bold;
@@ -308,7 +308,7 @@
 
 .stat {
   flex: 1;
-  background: white;
+  background: var(--surface);
   padding: 16px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -327,7 +327,7 @@
 }
 
 .chart-box {
-  background: white;
+  background: var(--surface);
   padding: 16px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -337,7 +337,7 @@
 .compare-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--surface);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -347,11 +347,11 @@
 .compare-table td {
   padding: 14px 16px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border);
 }
 
 .compare-table th {
-  background: #fafafe;
+  background: var(--surface-2);
   color: var(--muted);
   font-size: 13px;
   text-transform: uppercase;
@@ -383,7 +383,7 @@
 
 /* Alert form */
 .alert-form {
-  background: white;
+  background: var(--surface);
   padding: 18px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -410,7 +410,7 @@
   flex: 1;
   min-width: 160px;
   padding: 11px 14px;
-  border: 1px solid #d9dbe6;
+  border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 15px;
 }
@@ -457,7 +457,7 @@
 .admin-login{
   max-width: 360px;
   margin: 40px auto;
-  background: white;
+  background: var(--surface);
   padding: 24px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -475,7 +475,7 @@
 }
 
 .admin-form{
-  background: white;
+  background: var(--surface);
   padding: 20px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -500,10 +500,10 @@
 .admin-form select,
 .admin-form input{
   padding: 10px 12px;
-  border: 1px solid #d9dbe6;
+  border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 15px;
-  background: white;
+  background: var(--surface);
 }
 
 .admmin-form button[type="submit"],
@@ -521,7 +521,7 @@
 
 .secondary-btn{
   padding: 9px 16px;
-  background: #eef0ff;
+  background: var(--tint);
   color: var(--primary);
   border: none;
   border-radius: 10px;
@@ -544,4 +544,75 @@
   padding: 6px 14px;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* Highlight strips */
+.strip{
+  margin: 24px 0 8px;
+}
+
+.strip h2,
+.section-title{
+  margin: 0;
+  font-size: 22px;
+}
+
+.strip-subtitle{
+  margin: 4px 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.strip-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 2px 14px;
+  scroll-snap-type: x proximity;
+}
+
+.strip-item{
+  flex: 0 0 240px;
+  scroll-snap-align: start;
+}
+
+/* Show more */
+.show-more{
+  display: block;
+  margin: 28px auto 0;
+  padding: 12px 28px;
+  background: var(--surface);
+  color: var(--primary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.show-more:hover{
+  border-color: var(--primary);
+}
+
+/* Theme toggle */
+.site-header{
+  position: relative;
+}
+
+.theme-toggle{
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
 }

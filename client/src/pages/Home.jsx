@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react"
-import { API_URL, getBestListing } from "../utils"
+import { API_URL, getBestListing, getPriceStats } from "../utils"
 import ProductCard from "../components/ProductCard"
+import ProductStrip from "../components/ProductStrip"
 import SearchBar from "../components/SearchBar"
+
+const PAGE_SIZE = 12
 
 function Home() {
     const [products, setProducts] = useState([])
@@ -10,6 +13,7 @@ function Home() {
     const [searchText, setSearchText] = useState("")
     const [sortBy, setSortBy] = useState("default")
     const [category, setCategory] = useState("All")
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
     
     useEffect(() => {
         async function loadProducts(){
@@ -28,7 +32,17 @@ function Home() {
         loadProducts()
     }, [])
 
-    if (loading) return <p className="status-message">Loading products... The server may take up to a minute to wake up</p>
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE)
+    }, [searchText, category, sortBy])
+
+    if(loading){
+        return (
+            <p className="status-message">
+                Loading products... The server may take up to a minute to wake up.
+            </p>
+        )
+    }
     if (error) return <p className="status-message">{error}</p>
 
     const categories = ["All", ...new Set(products.map((p) => p.category).filter(Boolean))]
@@ -56,6 +70,27 @@ function Home() {
         return 0
     })
 
+    // Highlight section (only shown when not searching or filtering)
+    const isBrowsing = searchText === "" && category === "All"
+
+    const analysed = products.map((product) => {
+        const best = getBestListing(product)
+        const stats = getPriceStats(product)
+        const dropFromPeak = stats.highest > 0 ? (stats.highest - best.price) / stats.highest : 0
+        return { product, atLowest: best.price <= stats.lowest, dropFromPeak}
+    })
+
+    const lowestEver = analysed.filter((X) => X.atLowest).map((x) => x.product)
+
+    const biggestDrops = analysed
+        .filter((x) => x.dropFromPeak > 0)
+        .sort((a, b) => b.dropFromPeak - a.dropFromPeak)
+        .slice(0, 8)
+        .map((x) => x.product)
+
+    const visibleProducts = sortedProducts.slice(0, visibleCount)
+    const remaining = sortedProducts.length - visibleProducts.length
+
     return (
         <div>
             <SearchBar value={searchText} onChange={setSearchText} />
@@ -72,10 +107,25 @@ function Home() {
                 ))}
             </div>
 
+            {isBrowsing && (
+                <>
+                    <ProductStrip
+                        title="🔥 Biggest price drops"
+                        subtitle="Furthest below each product's highest recorded price"
+                        products={biggestDrops}
+                    />
+                    <ProductStrip
+                        title="🏆 Lowest price ever"
+                        subtitle="Currently at their cheapest recorded price"
+                        products={lowestEver}
+                    />
+                </>
+            )}
+
             <div className="toolbar">
-                <p className="result-count">
-                    Showing {filteredProducts.length} of {products.length} products
-                </p>
+                <h2 className="section-title">
+                    {isBrowsing ? "All products" : "Results"}
+                </h2>
                 <select 
                     className="sort-select"
                     value={sortBy}
@@ -89,11 +139,24 @@ function Home() {
                 </select>
             </div>
 
+            <p className="result-count">
+                Showing {visibleProducts.length} of {filteredProducts.length} products
+            </p>   
+
             <div className="product-grid">
-                {sortedProducts.map(product => (
+                {visibleProducts.map(product => (
                     <ProductCard key={product.id} product={product} />
                 ))}
             </div>
+
+            {remaining > 0 && (
+                <button
+                    className="show-more"
+                    onClick={() => setVisibleCount(visibleCount + PAGE_SIZE)}
+                >
+                    Show more ({remaining} left)
+                </button>
+            )}
 
             {filteredProducts.length === 0 && (
                 <p className="status-message">No products found.</p>
