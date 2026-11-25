@@ -191,3 +191,53 @@ export async function deleteProduct(id){
   const result = await pool.query("DELETE FROM products WHERE id = $1", [id])
   return result.rowCount > 0
 }
+
+export async function createUser(email, passwordHash) {
+  try {
+    const result = await pool.query(
+      "INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id",
+      [email, passwordHash]
+    )
+    return result.rows[0].id
+  } catch (err) {
+    if (err.code === "23505") return null // email already exists
+    throw err
+  }
+}
+
+export async function getUserByEmail(email) {
+  const result = await pool.query(
+    "SELECT id, email, password_hash FROM users WHERE email = $1",
+    [email]
+  )
+  return result.rows[0] || null
+}
+
+export async function getWatchlistProductIds(userId) {
+  const result = await pool.query(
+    "SELECT product_id FROM watchlist WHERE user_id = $1 ORDER BY created_at DESC",
+    [userId]
+  )
+  return result.rows.map((r) => r.product_id)
+}
+
+export async function addToWatchlist(userId, productId) {
+  try {
+    await pool.query(
+      `INSERT INTO watchlist (user_id, product_id) VALUES ($1, $2)
+       ON CONFLICT DO NOTHING`,
+      [userId, productId]
+    )
+    return true
+  } catch (err) {
+    if (err.code === "23503") return false // product doesn't exist
+    throw err
+  }
+}
+
+export async function removeFromWatchlist(userId, productId) {
+  await pool.query(
+    "DELETE FROM watchlist WHERE user_id = $1 AND product_id = $2",
+    [userId, productId]
+  )
+}

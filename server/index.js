@@ -2,8 +2,22 @@ import cron from "node-cron"
 import { updateAllPrices } from "./jobs/updatePrices.js"
 import express from "express"
 import cors from "cors"
-import { getProducts, addProduct, updateProduct, deleteProduct, recordPrice, addAlert } from "./db/queries.js"
+import {
+  getProducts,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  recordPrice,
+  addAlert,
+  createUser,
+  getUserByEmail,
+  getWatchlistProductIds,
+  addToWatchlist,
+  removeFromWatchlist,
+} from "./db/queries.js"
 import rateLimit from "express-rate-limit"
+import bcrypt from "bcryptjs"
+import { signToken, requireUser } from "./auth.js"
 
 const app = express()
 const PORT = process.env.PORT || 5000
@@ -31,13 +45,6 @@ function checkAdminKey(req, res, next){
 }
 
 const requireAdmin = [adminLimiter, checkAdminKey]
-
-// function requireAdmin(req, res, next){
-//   if(!process.env.ADMIN_KEY || req.headers["x-admin-key"] !== process.env.ADMIN_KEY){
-//     return res.status(401).json({ error: "Unauthorized" })
-//   }
-//   next()
-// }
 
 app.get("/", (req, res) => {
   res.send("Price Tracker API is running")
@@ -75,36 +82,6 @@ app.get("/api/products/:id", async (req, res) => {
     res.status(500).json({ error: "Something went wrong" })
   }
 })
-
-// app.post("/api/products", requireAdmin, async (req, res) => {
-//   try {
-//     console.log("body received:", req.body)
-
-//     if (!req.body || typeof req.body.name !== "string" || req.body.name.trim() === "") {
-//   return res.status(400).json({ error: "name is missing or not text" })
-//     }
-//     if (!Array.isArray(req.body.listings) || req.body.listings.length === 0) {
-//   return res.status(400).json({ error: "listings must be a non-empty array" })
-// }
-// for (const l of req.body.listings) {
-//   if (typeof l.store !== "string") {
-//     return res.status(400).json({ error: "each listing needs a store name (text)" })
-//   }
-//   if (!Number.isInteger(l.price) || l.price <= 0) {
-//     return res.status(400).json({ error: "price must be a whole number above 0" })
-//   }
-//   if (!Number.isInteger(l.originalPrice) || l.originalPrice <= 0) {
-//     return res.status(400).json({ error: "originalPrice must be a whole number above 0" })
-//   }
-// } 
-// const { name, listings } = req.body
-// const id = await addProduct({ name: name.trim(), listings })
-// res.status(201).json({ id })
-//   } catch (err) {
-//     console.error(err)
-//     res.status(500).json({ error: "Something went wrong" })
-//   }
-// })
 
 function cleanProductFields(body){
   const { name, category, image } = body || {}
@@ -263,6 +240,109 @@ app.post("/api/alerts", async (req, res) => {
     }
 
     res.status(201).json({ id })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
+  }
+})
+
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20 })
+const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 10)
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function readCredentials(body) {
+  const rawEmail = typeof body?.email === "string" ? body.email.trim() : ""
+  const password = body?.password
+
+  if (rawEmail.length > 254 || !EMAIL_RE.test(rawEmail)) {
+    return { error: "Please enter a valid email" }
+  }
+  if (typeof password !== "string" || password.length === 0) {
+    return { error: "Password is required" }
+  }
+  if (password.length > 200) {
+    return { error: "Password is too long" }
+  }
+  return { email: rawEmail.toLowerCase(), password }
+}
+
+app.post("/api/auth/signup", authLimiter, async (req, res) => {
+  try {
+    const creds = readCredentials(req.body)
+    if (creds.error) return res.status(400).json({ error: creds.error })
+
+    if (creds.password.length < 8 || creds.password.length > 72) {
+      return res.status(400).json({ error: "Password must be 8 to 72 characters" })
+    }
+
+    const hash = await bcrypt.hash(creds.password, 10)
+    const id = await createUser(creds.email, hash)
+    if (id === null) {
+      return res.status(409).json({ error: "An account with this email already exists" })
+    }
+
+    res.status(201).json({ token: signToken(id), user: { id, email: creds.email } })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
+  }
+})
+
+app.post("/api/auth/login", authLimiter, async (req, res) => {
+  try {
+    const creds = readCredentials(req.body)
+    if (creds.error) return res.status(400).json({ error: creds.error })
+
+    const user = await getUserByEmail(creds.email)
+    const ok = await bcrypt.compare(creds.password, user ? user.password_hash : DUMMY_HASH)
+
+    if (!user || !ok) {
+      return res.status(401).json({ error: "Invalid email or password" })
+    }
+
+    res.json({ token: signToken(user.id), user: { id: user.id, email: user.email } })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
+  }
+})
+
+app.get("/api/watchlist", requireUser, async (req, res) => {
+  try {
+    const ids = await getWatchlistProductIds(req.userId)
+    if (ids.length === 0) return res.json([])
+
+    const all = await getProducts()
+    const byId = new Map(all.map((p) => [p.id, p]))
+    res.json(ids.map((id) => byId.get(id)).filter(Boolean))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
+  }
+})
+
+app.post("/api/watchlist/:productId", requireUser, async (req, res) => {
+  try {
+    const productId = Number(req.params.productId)
+    if (!Number.isInteger(productId)) return res.status(404).json({ error: "Product not found" })
+
+    const ok = await addToWatchlist(req.userId, productId)
+    if (!ok) return res.status(404).json({ error: "Product not found" })
+
+    res.status(201).json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Something went wrong" })
+  }
+})
+
+app.delete("/api/watchlist/:productId", requireUser, async (req, res) => {
+  try {
+    const productId = Number(req.params.productId)
+    if (!Number.isInteger(productId)) return res.status(404).json({ error: "Product not found" })
+
+    await removeFromWatchlist(req.userId, productId)
+    res.json({ ok: true })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: "Something went wrong" })

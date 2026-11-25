@@ -3,6 +3,8 @@ DROP TABLE IF EXISTS listings;
 DROP TABLE IF EXISTS stores;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS alerts;
+DROP TABLE IF EXISTS watchlist;
+DROP TABLE IF EXISTS users;
 
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
@@ -41,4 +43,18 @@ CREATE TABLE alerts (
     target_price INT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     notified_at TIMESTAMPTZ
+);
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL UNQUE,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE watchlist (
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, product_id)
 );
