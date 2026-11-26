@@ -58,3 +58,21 @@ export async function adminFetch(path, adminKey, options = {}) {
   if(!res.ok) throw new Error(data?.error || `Request failed (${res.status})`)
   return data
 }
+
+export async function authFetch(path, token, options = {}){
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  const data = await res.json().catch(() => null)
+  if(!res.ok){
+    const err = new Error(data?.error || `Request failed (${res.status})`)
+    err.status = res.status
+    throw err
+  }
+  return data
+}

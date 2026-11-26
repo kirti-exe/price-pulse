@@ -4,6 +4,7 @@ import { API_URL, getBestListing, getPriceStats, getDealVerdict } from "../utils
 import PriceChart from "../components/PriceChart";
 import AlertForm from "../components/AlertForm";
 import ProductImage from "../components/ProductImage";
+import SaveButton from "../components/SaveButton"
 
 function ProductPage(){
     const { id } = useParams()
@@ -69,6 +70,8 @@ function ProductPage(){
                         {belowAverage > 0 && ` · ${belowAverage}% below the average price`}
                         {belowAverage < 0 && ` · ${Math.abs(belowAverage)}% above the average price`}
                     </p>
+
+                    <SaveButton productId={product.id} />
                 </div>
             </div>
 
