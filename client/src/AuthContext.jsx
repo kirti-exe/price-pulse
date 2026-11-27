@@ -62,6 +62,11 @@ export function AuthProvider({ children }){
         setWatchlist(await authFetch("/api/watchlist", auth.token))
     }
 
+    async function deleteAccount(){
+        await authFetch("/api/account", auth.token, { method: "DELETE" })
+        logout()
+    }
+
     const value = {
         user: auth?.user ?? null,
         watchlist,
@@ -69,6 +74,7 @@ export function AuthProvider({ children }){
         logout,
         isSaved,
         toggleSave,
+        deleteAccount,
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -17,9 +17,11 @@ import {
 } from "./db/queries.js"
 import rateLimit from "express-rate-limit"
 import bcrypt from "bcryptjs"
+import helmet from "helmet"
 import { signToken, requireUser } from "./auth.js"
 
 const app = express()
+app.use(helmet())
 const PORT = process.env.PORT || 5000
 
 app.set("trust proxy", 1)
@@ -29,7 +31,7 @@ app.use(
     origin: process.env.CLIENT_URL || "http://localhost:5173",
   })
 )
-app.use(express.json())
+app.use(express.json({ limit: "10kb" }))
 
 const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

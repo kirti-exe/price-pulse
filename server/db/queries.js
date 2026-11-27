@@ -241,3 +241,7 @@ export async function removeFromWatchlist(userId, productId) {
     [userId, productId]
   )
 }
+
+export async function deleteUser(userId){
+  await pool.query("DELETE FORM users WHERE id = $1", [userId])
+}
